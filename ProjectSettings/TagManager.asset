@@ -7,6 +7,8 @@ TagManager:
   - chao
   - CuboA
   - buraco
+  - Pontos
+  - Total
   layers:
   - Default
   - TransparentFX

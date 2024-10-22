@@ -1,15 +1,22 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
+using UnityEditor.Build.Content;
 using UnityEngine;
- 
-public class BolinhaMove : MonoBehaviour
+using UnityEngine.SceneManagement;
+
+public class BolinhaMov2 : MonoBehaviour
 {
     private float moveH; private float moveV;
     private Rigidbody rb;
     [SerializeField] private float velocidade; [SerializeField] private float forcaPulo;
     [SerializeField] private bool invertH; [SerializeField] private bool invertV;
     [SerializeField] private int pontos;
-    private bool estaVivo = true;
+    private TextMeshProUGUI textoPontos;
+    private TextMeshProUGUI textoTotal;
+    public bool estaVivo = true;
+    public bool podePular;
 
     [Header("Sons Bolinha")]
     [SerializeField] private AudioClip pulo;
@@ -21,6 +28,9 @@ public class BolinhaMove : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
         audioPlayer = GetComponent<AudioSource>();
+        textoPontos = GameObject.FindGameObjectWithTag("Pontos").GetComponent<TextMeshProUGUI>();
+        textoTotal = GameObject.Find("Total").GetComponent<TextMeshProUGUI>();
+        textoTotal.text = GameObject.FindGameObjectsWithTag("CuboA").Length.ToString();
     }
  
     // Update is called once per frame
@@ -35,11 +45,29 @@ public class BolinhaMove : MonoBehaviour
             transform.position += new Vector3(moveH * velocidade * Time.deltaTime, 0 , moveV * velocidade * Time.deltaTime);
  
             //PULO
-            if(Input.GetKeyDown(KeyCode.Space))
+            if(podePular && Input.GetKeyDown(KeyCode.Space)) 
             {
                 rb.AddForce(transform.up * forcaPulo, ForceMode.Impulse);
                 audioPlayer.PlayOneShot(pulo);
+                Debug.Log("pode pular");
+                podePular = false;
+
             }
+            
+        }
+
+        if (Input.GetKeyDown(KeyCode.LeftShift))
+        {
+            velocidade = velocidade * 3;
+        }
+        if (Input.GetKeyUp(KeyCode.LeftShift))
+        {
+            velocidade = velocidade / 3;
+        }
+        
+        if (pontos == 20)
+        {
+            SceneManager.LoadScene("Fase2");
         }
 
     }
@@ -50,15 +78,26 @@ public class BolinhaMove : MonoBehaviour
         Destroy(other.gameObject);
         audioPlayer.PlayOneShot(pegarCubo);
         pontos++;
+        textoPontos.text = pontos.ToString();
+        
 
     }
 
     private void OnCollisionEnter(Collision other) 
     {
-        if (other.gameObject.CompareTag("Buraco"))
+        if (other.gameObject.CompareTag("buraco"))
         {
+            SceneManager.LoadScene("");
             estaVivo = false;
         }
+        
+        if (other.gameObject.CompareTag("chao"))
+        {
+            podePular = true;
+            Debug.Log("pode pular");
+
+        }
+
     }
 
 }
